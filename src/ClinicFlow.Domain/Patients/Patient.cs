@@ -1,0 +1,14 @@
+﻿using ClinicFlow.Domain.Common.Entities;
+
+namespace ClinicFlow.Domain.Patients;
+
+public class Patient : TenantEntity
+{
+    public string FirstName { get; set; } = default!;
+    public string LastName { get; set; } = default!;
+    public DateTime? BirthDate { get; set; }
+    public string? PhoneNumber { get; set; }
+    public string? Email { get; set; }
+    public string? Notes { get; set; }
+    public bool IsActive { get; set; } = true;
+}
