@@ -1,5 +1,7 @@
 <Solution>
   <Folder Name="/src/">
+    <File Path="AGENTS.md" />
+    <File Path="README.md" />
     <Project Path="src/ClinicFlow.API/ClinicFlow.API.csproj" />
     <Project Path="src/ClinicFlow.Application/ClinicFlow.Application.csproj" />
     <Project Path="src/ClinicFlow.Domain/ClinicFlow.Domain.csproj" />

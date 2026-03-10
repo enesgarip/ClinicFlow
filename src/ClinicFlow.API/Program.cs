@@ -1,5 +1,7 @@
 using ClinicFlow.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
+using ClinicFlow.API.Infrastructure.Tenancy;
+using ClinicFlow.Application.Abstractions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,7 +13,8 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 
 builder.Services.AddDbContext<ClinicFlowDbContext>(options =>
     options.UseNpgsql(connectionString));
-
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<ITenantProvider, HeaderTenantProvider>();
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
