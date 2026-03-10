@@ -1,7 +1,9 @@
 using ClinicFlow.Infrastructure.Persistence;
+using ClinicFlow.Infrastructure.Services.Patients;
 using Microsoft.EntityFrameworkCore;
 using ClinicFlow.API.Infrastructure.Tenancy;
 using ClinicFlow.Application.Abstractions;
+using ClinicFlow.Application.Patients;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,6 +17,7 @@ builder.Services.AddDbContext<ClinicFlowDbContext>(options =>
     options.UseNpgsql(connectionString));
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ITenantProvider, HeaderTenantProvider>();
+builder.Services.AddScoped<IPatientService, PatientService>();
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
