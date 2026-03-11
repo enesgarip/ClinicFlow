@@ -1,5 +1,4 @@
-﻿using ClinicFlow.API.Infrastructure.Tenancy;
-using ClinicFlow.Application.Abstractions;
+﻿using ClinicFlow.Application.Abstractions;
 using ClinicFlow.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
@@ -9,7 +8,7 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace ClinicFlow.IntegrationTests.Common;
 
-public class CustomWebApplicationFactory : WebApplicationFactory<Program>
+public class CustomWebApplicationFactory : WebApplicationFactory<Program>, IAsyncLifetime
 {
     public Guid TenantId { get; } = Guid.Parse("11111111-1111-1111-1111-111111111111");
 
@@ -21,13 +20,21 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
         {
             services.RemoveAll<ITenantProvider>();
             services.AddScoped<ITenantProvider>(_ => new TestTenantProvider(TenantId));
-
-            using var scope = services.BuildServiceProvider().CreateScope();
-            var dbContext = scope.ServiceProvider.GetRequiredService<ClinicFlowDbContext>();
-
-            dbContext.Database.EnsureDeleted();
-            dbContext.Database.Migrate();
         });
+    }
+
+    public async Task InitializeAsync()
+    {
+        using var scope = Services.CreateScope();
+        var dbContext = scope.ServiceProvider.GetRequiredService<ClinicFlowDbContext>();
+
+        await dbContext.Database.EnsureDeletedAsync();
+        await dbContext.Database.MigrateAsync();
+    }
+
+    public new Task DisposeAsync()
+    {
+        return Task.CompletedTask;
     }
 
     public HttpClient CreateTenantClient()
