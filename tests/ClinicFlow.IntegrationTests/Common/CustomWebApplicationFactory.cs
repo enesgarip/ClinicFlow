@@ -32,4 +32,10 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
             db.Database.EnsureCreated();
         });
     }
+    public HttpClient CreateTenantClient()
+    {
+        var client = CreateClient();
+        client.DefaultRequestHeaders.Add("X-Tenant-Id", "11111111-1111-1111-1111-111111111111");
+        return client;
+    }
 }
