@@ -1,4 +1,4 @@
-name: CI
+name: ci
 
 on:
   pull_request:
@@ -8,7 +8,7 @@ on:
 
 jobs:
   build-test:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
 
     services:
       postgres:
@@ -20,10 +20,14 @@ jobs:
         ports:
           - 5432:5432
         options: >-
-          --health-cmd="pg_isready -U postgres -d clinicflowdb"
-          --health-interval=10s
-          --health-timeout=5s
-          --health-retries=5
+          --health-cmd "pg_isready -U postgres -d clinicflowdb"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      ASPNETCORE_ENVIRONMENT: CI
+      ConnectionStrings__DefaultConnection: Host=localhost;Port=5432;Database=clinicflowdb;Username=postgres;Password=postgres
 
     steps:
       - name: Checkout
@@ -37,8 +41,19 @@ jobs:
       - name: Restore
         run: dotnet restore
 
+      - name: Verify format
+        run: dotnet format --verify-no-changes --verbosity minimal
+
       - name: Build
         run: dotnet build --no-restore --configuration Release
 
       - name: Test
-        run: dotnet test --no-build --configuration Release --verbosity normal
+        run: dotnet test --no-build --configuration Release --collect:"XPlat Code Coverage" --verbosity normal
+
+      - name: Upload coverage artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-and-coverage
+          path: |
+            **/TestResults/**
