@@ -12,8 +12,13 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
 
         builder.ConfigureAppConfiguration((context, config) =>
         {
-            config.AddJsonFile("appsettings.json", optional: true)
-                  .AddJsonFile("appsettings.Development.json", optional: true);
+            var settings = new Dictionary<string, string?>
+            {
+                ["ConnectionStrings:DefaultConnection"] =
+                    "Host=localhost;Port=5432;Database=clinicflowdb;Username=postgres;Password=postgres"
+            };
+
+            config.AddInMemoryCollection(settings);
         });
     }
 
