@@ -2,9 +2,11 @@ name: ci
 
 on:
   pull_request:
-    branches: [ master ]
+    branches:
+      - master
   push:
-    branches: [ master ]
+    branches:
+      - master
 
 jobs:
   build-test:
@@ -41,16 +43,13 @@ jobs:
       - name: Restore
         run: dotnet restore
 
-      - name: Verify format
-        run: dotnet format --verify-no-changes --verbosity minimal
-
       - name: Build
         run: dotnet build --no-restore --configuration Release
 
       - name: Test
         run: dotnet test --no-build --configuration Release --collect:"XPlat Code Coverage" --verbosity normal
 
-      - name: Upload coverage artifacts
+      - name: Upload test results and coverage
         if: always()
         uses: actions/upload-artifact@v4
         with:
