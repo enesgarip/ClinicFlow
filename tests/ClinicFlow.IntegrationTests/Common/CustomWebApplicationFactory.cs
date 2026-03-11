@@ -1,18 +1,23 @@
-﻿using System.Net.Http.Headers;
+﻿using ClinicFlow.Infrastructure.Persistence;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace ClinicFlow.IntegrationTests;
 
 public class CustomWebApplicationFactory : WebApplicationFactory<Program>
 {
-    public HttpClient CreateTenantClient(Guid? tenantId = null)
+    protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
-        var client = CreateClient();
+        builder.UseEnvironment("CI");
 
-        client.DefaultRequestHeaders.Add(
-            "X-Tenant-Id",
-            (tenantId ?? Guid.Parse("11111111-1111-1111-1111-111111111111")).ToString());
+        builder.ConfigureServices(services =>
+        {
+            var scope = services.BuildServiceProvider().CreateScope();
+            var dbContext = scope.ServiceProvider.GetRequiredService<ClinicFlowDbContext>();
 
-        return client;
+            dbContext.Database.Migrate();
+        });
     }
 }
