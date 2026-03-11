@@ -1,32 +1,35 @@
-﻿using Microsoft.AspNetCore.Hosting;
+﻿using ClinicFlow.Infrastructure.Persistence;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
-using Microsoft.Extensions.Configuration;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
-namespace ClinicFlow.IntegrationTests.Common;
+namespace ClinicFlow.IntegrationTests;
 
 public class CustomWebApplicationFactory : WebApplicationFactory<Program>
 {
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
-        builder.UseEnvironment("Development");
+        builder.UseEnvironment("Testing");
 
-        builder.ConfigureAppConfiguration((context, config) =>
+        builder.ConfigureServices(services =>
         {
-            var settings = new Dictionary<string, string?>
-            {
-                ["ConnectionStrings:DefaultConnection"] =
-                    "Host=localhost;Port=5432;Database=clinicflowdb;Username=postgres;Password=postgres"
-            };
+            services.RemoveAll<DbContextOptions<ClinicFlowDbContext>>();
+            services.RemoveAll<ClinicFlowDbContext>();
 
-            config.AddInMemoryCollection(settings);
+            var connectionString =
+                "Host=localhost;Port=5432;Database=clinicflowdb;Username=postgres;Password=postgres";
+
+            services.AddDbContext<ClinicFlowDbContext>(options =>
+                options.UseNpgsql(connectionString));
+
+            var sp = services.BuildServiceProvider();
+
+            using var scope = sp.CreateScope();
+            var db = scope.ServiceProvider.GetRequiredService<ClinicFlowDbContext>();
+
+            db.Database.EnsureCreated();
         });
-    }
-
-    public HttpClient CreateTenantClient()
-    {
-        var client = CreateClient();
-        client.DefaultRequestHeaders.Remove(TestConstants.TenantHeaderName);
-        client.DefaultRequestHeaders.Add(TestConstants.TenantHeaderName, TestConstants.TenantId);
-        return client;
     }
 }
