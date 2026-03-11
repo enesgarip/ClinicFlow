@@ -1,3 +1,5 @@
+using System;
+
 namespace ClinicFlow.Domain.Common.Entities;
 
 public abstract class AuditableEntity : BaseEntity

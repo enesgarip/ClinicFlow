@@ -4,10 +4,15 @@ using Microsoft.EntityFrameworkCore;
 using ClinicFlow.API.Infrastructure.Tenancy;
 using ClinicFlow.Application.Abstractions;
 using ClinicFlow.Application.Patients;
-
+using ClinicFlow.Application.Patients.Validators;
+using FluentValidation;
+using FluentValidation.AspNetCore;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
+
+builder.Services.AddFluentValidationAutoValidation();
+builder.Services.AddValidatorsFromAssemblyContaining<CreatePatientDtoValidator>();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
@@ -33,3 +38,6 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
+public partial class Program
+{
+}
